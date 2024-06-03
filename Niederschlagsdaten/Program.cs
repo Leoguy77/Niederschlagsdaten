@@ -1,5 +1,14 @@
-﻿namespace ConsoleApp1
+﻿/// Author: Leon Schneider
+/// Version: 1.0
+/// Date: 28.05.2024
+
+using System.Text.Json;
+using System.IO;
+using System.Numerics;
+
+namespace ConsoleApp1
 {
+    
     internal class Program
     {
         /// <summary>
@@ -32,26 +41,32 @@
             MonatMitDemWenigstenNiederschlag = 5,
             DurchschnittlicherNiederschlag = 6,
             GesamtNiederschlag = 7,
-            Beenden = 8
+            DatenSpeichern = 8,
+            DatenLaden = 9,
+            VergleichMitGespeichertenDaten = 10,
+            Beenden = 11
         }
         static void Main(string[] args)
         {
+            bool firstRun = true;
+
             int[] daten = new int[12];
 
             MenuOptionen option = MenuOptionen.Dateneingabe;
 
             while (option != MenuOptionen.Beenden)
             {
+                if(!firstRun)
+                {
+                    Console.WriteLine("Drücken Sie eine Taste um fortzufahren...");
+                    Console.ReadKey();
+                    Console.Clear();
+                }
                 Console.WriteLine("------------------Wetterdaten------------------");
-                Console.WriteLine("1. Daten eingeben");
-                Console.WriteLine("2. Alle Daten ausgeben");
-                Console.WriteLine("3. Daten eines Monats ausgeben");
-                Console.WriteLine("4. Monat mit dem meisten Niederschlag");
-                Console.WriteLine("5. Monat mit dem wenigsten Niederschlag");
-                Console.WriteLine("6. Durchschnittlicher Niederschlag");
-                Console.WriteLine("7. Gesamt Niederschlag");
-                Console.WriteLine("8. Beenden");
-                Console.WriteLine("Bitte wählen Sie eine Option: ");
+                foreach (MenuOptionen item in Enum.GetValues(typeof(MenuOptionen)))
+                {
+                    Console.WriteLine($"{(int)item}. {item}");
+                }
                 Console.WriteLine("----------------------------------------------");
 
                 try
@@ -63,24 +78,45 @@
                             daten = DatenEinlesen();
                             break;
                         case MenuOptionen.AlleDatenAusgeben:
+                            Console.Clear();
                             DatenAusgeben(daten);
                             break;
                         case MenuOptionen.DatenEinesMonatsAusgeben:
+                            Console.Clear();
                             Console.WriteLine("Bitte Monat eingeben: ");
                             int monat = Convert.ToInt32(Console.ReadLine());
                             DatenAusgeben(daten, monat);
                             break;
                         case MenuOptionen.MonatMitDemMeistenNiederschlag:
+                            Console.Clear();
                             Console.WriteLine($"Monat mit dem meisten Niederschlag: {MonatMitDemMeistenNiederschlag(daten)}");
                             break;
                         case MenuOptionen.MonatMitDemWenigstenNiederschlag:
+                            Console.Clear();
                             Console.WriteLine($"Monat mit dem wenigsten Niederschlag: {MonatMitDemWenigstenNiederschlag(daten)}");
                             break;
                         case MenuOptionen.DurchschnittlicherNiederschlag:
+                            Console.Clear();
                             Console.WriteLine($"Durchschnittlicher Niederschlag: {DurchschnittlicherNiederschlag(daten)}");
                             break;
                         case MenuOptionen.GesamtNiederschlag:
+                            Console.Clear();
                             Console.WriteLine($"Gesamt Niederschlag: {GesamtNiederschlag(daten)}");
+                            break;
+                        case MenuOptionen.DatenSpeichern:
+                            Console.Clear();
+                            Console.WriteLine("Daten speichern");
+                            DatenSpeichern(daten);
+                            break;
+                        case MenuOptionen.DatenLaden:
+                            Console.Clear();
+                            Console.WriteLine("Daten laden");
+                            daten = DatenLaden();
+                            break;
+                        case MenuOptionen.VergleichMitGespeichertenDaten:
+                            Console.Clear();
+                            Console.WriteLine("Vergleich mit gespeicherten Daten");
+                            VergleichMitGespeichertenDaten(daten);
                             break;
                         case MenuOptionen.Beenden:
                             return;
@@ -93,6 +129,7 @@
                 {
                     Console.WriteLine("Fehler: " + e.Message);
                 }
+                firstRun = false;
             }
 
         }
@@ -204,6 +241,39 @@
                 sum += daten[i];
             }
             return sum;
+        }
+        static void DatenSpeichern(int[] daten)
+        {
+            string FileName = "daten.json";
+            File.WriteAllText(FileName, JsonSerializer.Serialize(daten));
+            Console.WriteLine("Daten gespeichert");
+        }
+        static int[] DatenLaden()
+        {
+            string FileName = "daten.json";
+            if (File.Exists(FileName))
+            {
+                return JsonSerializer.Deserialize<int[]>(File.ReadAllText(FileName));
+            }
+            return new int[12];
+        }
+        static void VergleichMitGespeichertenDaten(int[] daten)
+        {
+            int[] gespeicherteDaten;
+            string FileName = "daten.json";
+            if (File.Exists(FileName))
+            {
+                gespeicherteDaten = JsonSerializer.Deserialize<int[]>(File.ReadAllText(FileName));
+            }
+            else
+            {
+                gespeicherteDaten = new int[12];
+            }
+            double durchshnittGespeicherteDaten = DurchschnittlicherNiederschlag(gespeicherteDaten);
+            double durchschnittNeueDaten = DurchschnittlicherNiederschlag(daten);
+            Console.WriteLine("Durchschnitt gespeicherte Daten: " + durchshnittGespeicherteDaten);
+            Console.WriteLine("Durchschnitt neue Daten: " + durchschnittNeueDaten);
+            Console.WriteLine("Differenz: " + (durchschnittNeueDaten - durchshnittGespeicherteDaten));
         }
     }
 }
