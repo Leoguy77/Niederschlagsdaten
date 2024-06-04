@@ -44,7 +44,8 @@ namespace ConsoleApp1
             DatenSpeichern = 8,
             DatenLaden = 9,
             VergleichMitGespeichertenDaten = 10,
-            Beenden = 11
+            RandomDatenAusgeben = 11,
+            Beenden = 12
         }
         static void Main(string[] args)
         {
@@ -117,6 +118,11 @@ namespace ConsoleApp1
                             Console.Clear();
                             Console.WriteLine("Vergleich mit gespeicherten Daten");
                             VergleichMitGespeichertenDaten(daten);
+                            break;
+                        case MenuOptionen.RandomDatenAusgeben:
+                            Console.Clear();
+                            Console.WriteLine("Random Daten ausgeben");
+                            DatenAusgabenMitMultiDimArray(RandomNiederschlagsdatenMitMultiDimArray());
                             break;
                         case MenuOptionen.Beenden:
                             return;
@@ -274,6 +280,29 @@ namespace ConsoleApp1
             Console.WriteLine("Durchschnitt gespeicherte Daten: " + durchshnittGespeicherteDaten);
             Console.WriteLine("Durchschnitt neue Daten: " + durchschnittNeueDaten);
             Console.WriteLine("Differenz: " + (durchschnittNeueDaten - durchshnittGespeicherteDaten));
+        }
+        static int[,] RandomNiederschlagsdatenMitMultiDimArray()
+        {
+            int[,] daten = new int[5, 12];
+            for (int i = 0; i < daten.GetLength(0); i++)
+            {
+                for (int j = 0; j < daten.GetLength(1); j++)
+                {
+                    daten[i, j] = new Random().Next(0, 100);
+                }
+            }
+            return daten;
+        }
+        static void DatenAusgabenMitMultiDimArray(int[,] daten)
+        {
+            for (int i = 0; i < daten.GetLength(0); i++)
+            {
+                Console.WriteLine("Stadt " + (i + 1));
+                for (int j = 0; j < daten.GetLength(1); j++)
+                {
+                    Console.WriteLine("Monat " + ((Monate)j + 1) + ": " + daten[i, j]);
+                }
+            }
         }
     }
 }
